@@ -24,6 +24,17 @@ Run service
 
 `bundle exec ruby main.rb`
 
-`
-curl http://localhost:8080/v1/time/now --header 'Content-Type: application/json; charset=utf-8'`
+# Time
 
+`
+curl http://localhost:8080/1/Time/now --header 'Content-Type: application/json; charset=utf-8'`
+
+# Hello
+
+`
+curl -X POST http://localhost:8080/1/Hello --header 'Content-Type: application/json; charset=utf-8' --data '{ "first_name": "Dave", "surname": "Oram" }'`
+
+Invalid:
+
+`
+curl -X POST http://localhost:8080/1/Hello --header 'Content-Type: application/json; charset=utf-8' --data '{ "first_name": "Dave" }'`
