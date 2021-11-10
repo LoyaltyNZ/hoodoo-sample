@@ -1,16 +1,13 @@
 class TimeImplementation < Hoodoo::Services::Implementation
     def show( context )
-      context.response.set_resource( { 'time' => Time.now.utc.iso8601 } )
+        context.response.set_resource( { 'time' => Time.now.utc.iso8601 } )
     end
-  end
+end
 
-  class TimeInterface < Hoodoo::Services::Interface
+class TimeInterface < Hoodoo::Services::Interface
     interface :Time do
-      endpoint :time, TimeImplementation
-      public_actions :show
+        endpoint :time, TimeImplementation
+        public_actions :show
     end
-  end
+end
 
-  class TimeService < Hoodoo::Services::Service
-    comprised_of TimeInterface
-  end
