@@ -1,3 +1,5 @@
+require 'hoodoo'
+
 class TimeImplementation < Hoodoo::Services::Implementation
     def show( context )
         context.response.set_resource( { 'time' => Time.now.utc.iso8601 } )
