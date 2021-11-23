@@ -13,7 +13,7 @@ class HelloImplementation < Hoodoo::Services::Implementation
   def create( context )
     body = context.request.body
     errors =  HelloPresenter.validate(body)
-    puts "Errors: #{errors.has_errors?} #{errors.inspect}"
+    #puts "Errors: #{errors.has_errors?} #{errors.inspect}"
     if !errors.has_errors?
       first_name = body['first_name']
       surname = body['surname']
