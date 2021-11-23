@@ -1,6 +1,5 @@
 require 'rack'
 require 'hoodoo'
-require_relative 'time_service.rb'
 require_relative 'hello_service.rb'
 
 
@@ -10,7 +9,6 @@ require_relative 'hello_service.rb'
 Object.send( :remove_const, :ActiveRecord ) rescue nil
 
 class SampleService < Hoodoo::Services::Service
-    comprised_of TimeInterface
     comprised_of HelloInterface
 end
 

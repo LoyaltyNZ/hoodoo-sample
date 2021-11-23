@@ -1,3 +1,5 @@
+require 'hoodoo'
+
 #
 # POST /1/Hello payload { "first_name": "Dave", "surname": "Oram" }
 # Returns 200 { "message": "Hello Dave Oram" }
@@ -11,13 +13,13 @@ class HelloImplementation < Hoodoo::Services::Implementation
   def create( context )
     body = context.request.body
     errors =  HelloPresenter.validate(body)
-    puts "Errors: #{errors.has_errors?} #{errors.inspect}"
+    #puts "Errors: #{errors.has_errors?} #{errors.inspect}"
     if !errors.has_errors?
       first_name = body['first_name']
       surname = body['surname']
       context.response.set_resource( { 'message' => "Hello #{first_name} #{surname}" } )
     else
-      context.response.set_resource( errors.render(Hoodoo::UUID.generate) )
+      context.response.add_errors( errors )
     end
   end
 end
