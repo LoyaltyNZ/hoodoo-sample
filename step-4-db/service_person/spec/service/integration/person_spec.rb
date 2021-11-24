@@ -173,9 +173,103 @@ RSpec.describe '1/Person' do
 
   context 'update' do
 
+    context 'person found' do
+
+      let(:p) { FactoryBot.create(:person) }
+
+      it 'returns 200' do
+        patch "/1/Person/#{p.id}", { name: 'Joe Smith' }.to_json, CONTENT_TYPE
+        expect(last_response.status).to eq 200
+      end
+
+      it 'renders the response correctly' do
+        patch "/1/Person/#{p.id}", { name: 'Joe Smith', date_of_birth: '2021-01-01' }.to_json, CONTENT_TYPE
+        msg = %({ "kind": "Person", "name": "Joe Smith", "date_of_birth": "2021-01-01" })
+        expect(last_response.body).to be_json_eql(msg)
+      end
+
+      it 'returns an error if the update is invalid' do
+        patch "/1/Person/#{p.id}", { name: 'Joe Smith', foo: 'bar' }.to_json, CONTENT_TYPE
+        expect(last_response.status).to eq 422
+      end
+
+    end
+
+    context 'person not found' do
+
+      let(:id) { Hoodoo::UUID.generate}
+
+      it 'returns 404' do
+        patch "/1/Person/#{id}", { name: 'Joe Smith' }.to_json, CONTENT_TYPE
+        expect(last_response.status).to eq 404
+      end
+
+      it 'renders the response correctly' do
+        patch "/1/Person/#{id}", { name: 'Joe Smith' }.to_json, CONTENT_TYPE
+        msg = %(
+          {
+            "errors": [
+              {
+                "code": "generic.not_found",
+                "message": "Resource not found",
+                "reference": "#{id}"
+              }
+            ],
+            "kind": "Errors"
+          }
+        )
+        expect(last_response.body).to be_json_eql(msg).excluding("interaction_id")
+      end
+
+    end
+
   end
 
   context 'delete' do
 
+    context 'person found' do
+
+      let(:p) { FactoryBot.create(:person_with_dob) }
+
+      it 'returns 200' do
+        delete "/1/Person/#{p.id}", nil, CONTENT_TYPE
+        expect(last_response.status).to eq 200
+      end
+
+      it 'renders the response correctly' do
+        delete "/1/Person/#{p.id}", nil, CONTENT_TYPE
+        msg = %({ "kind": "Person", "name": "#{p.name}", "date_of_birth": "#{p.date_of_birth}" })
+        expect(last_response.body).to be_json_eql(msg)
+      end
+
+    end
+
+    context 'person not found' do
+
+      let(:id) { Hoodoo::UUID.generate}
+
+      it 'returns 404' do
+        delete "/1/Person/#{id}", nil, CONTENT_TYPE
+        expect(last_response.status).to eq 404
+      end
+
+      it 'renders the response correctly' do
+        delete "/1/Person/#{id}", nil, CONTENT_TYPE
+        msg = %(
+          {
+            "errors": [
+              {
+                "code": "generic.not_found",
+                "message": "Resource not found",
+                "reference": "#{id}"
+              }
+            ],
+            "kind": "Errors"
+          }
+        )
+        expect(last_response.body).to be_json_eql(msg).excluding("interaction_id")
+      end
+
+    end
   end
 end
