@@ -12,6 +12,11 @@ require 'hoodoo'
 class HelloImplementation < Hoodoo::Services::Implementation
   def create( context )
     body = context.request.body
+
+    # Render first to apply any defaults
+    rendered = HelloPresenter.render( body )
+
+    # Validate to check for errors
     errors =  HelloPresenter.validate(body)
     #puts "Errors: #{errors.has_errors?} #{errors.inspect}"
     if !errors.has_errors?
