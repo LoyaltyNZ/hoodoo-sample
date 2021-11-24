@@ -19,6 +19,8 @@
 
 require 'spec_helper'
 
+CONTENT_TYPE = { 'CONTENT_TYPE' => 'application/json; charset=utf-8' }
+
 RSpec.describe '1/Person' do
 
   context 'show' do
@@ -28,16 +30,12 @@ RSpec.describe '1/Person' do
       let(:p) { FactoryBot.create(:person) }
 
       it 'returns 200' do
-        get "/1/Person/#{p.id}",
-            nil,
-            { 'CONTENT_TYPE' => 'application/json; charset=utf-8' }
+        get "/1/Person/#{p.id}", nil, CONTENT_TYPE
         expect(last_response.status).to eq 200
       end
 
       it 'renders the response correctly' do
-        get "/1/Person/#{p.id}",
-            nil,
-            { 'CONTENT_TYPE' => 'application/json; charset=utf-8' }
+        get "/1/Person/#{p.id}", nil, CONTENT_TYPE
         msg = %(
           {
             "kind": "Person",
@@ -54,16 +52,12 @@ RSpec.describe '1/Person' do
       let(:id) { Hoodoo::UUID.generate}
 
       it 'returns 404' do
-        get "/1/Person/#{id}",
-            nil,
-            { 'CONTENT_TYPE' => 'application/json; charset=utf-8' }
+        get "/1/Person/#{id}", nil, CONTENT_TYPE
         expect(last_response.status).to eq 404
       end
 
       it 'renders the response correctly' do
-        get "/1/Person/#{id}",
-            nil,
-            { 'CONTENT_TYPE' => 'application/json; charset=utf-8' }
+        get "/1/Person/#{id}", nil, CONTENT_TYPE
         msg = %(
           {
             "errors": [
@@ -85,9 +79,95 @@ RSpec.describe '1/Person' do
 
   context 'list' do
 
+    context 'have no people in the db' do
+
+      it 'returns 200' do
+        get "/1/Person", nil, CONTENT_TYPE
+        expect(last_response.status).to eq 200
+      end
+
+      it 'renders the response correctly' do
+        get "/1/Person", nil, CONTENT_TYPE
+        msg = %({ "_dataset_size": 0 })
+        expect(last_response.body).to be_json_eql(msg).excluding("_data")
+        expect(last_response.body).to have_json_size(0).at_path("_data")
+      end
+
+    end
+
+    context 'have some people in the db' do
+
+      before(:each) do
+        10.times do
+          FactoryBot.create(:person)
+        end
+      end
+
+      it 'returns 200' do
+        get "/1/Person", nil, CONTENT_TYPE
+        expect(last_response.status).to eq 200
+      end
+
+      it 'renders the response correctly' do
+        get "/1/Person", nil, CONTENT_TYPE
+        msg = %({ "_dataset_size": 10 })
+        expect(last_response.body).to be_json_eql(msg).excluding("_data")
+        expect(last_response.body).to have_json_size(10).at_path("_data")
+        # TODO check the _data elements
+      end
+
+    end
+
   end
 
   context 'create' do
+
+    context 'valid input' do
+
+      it 'returns 200' do
+        post "/1/Person", { name: 'Joe Smith' }.to_json, CONTENT_TYPE
+        expect(last_response.status).to eq 200
+      end
+
+      it 'renders the response correctly' do
+        post "/1/Person", { name: 'Joe Smith' }.to_json, CONTENT_TYPE
+        msg = %({ "kind": "Person", "name": "Joe Smith" })
+        expect(last_response.body).to be_json_eql(msg)
+      end
+
+      it 'renders the response correctly, when date_of_birth supplied' do
+        post "/1/Person", { name: 'Joe Smith', date_of_birth: '1980-11-03' }.to_json, CONTENT_TYPE
+        msg = %({ "kind": "Person", "name": "Joe Smith", "date_of_birth": "1980-11-03" })
+        expect(last_response.body).to be_json_eql(msg)
+      end
+
+    end
+
+    context 'invalid input' do
+
+      it 'returns 422' do
+        post "/1/Person", { }.to_json, CONTENT_TYPE
+        expect(last_response.status).to eq 422
+      end
+
+      it 'renders the response correctly' do
+        post "/1/Person", {  }.to_json, CONTENT_TYPE
+        msg = %(
+          {
+            "errors": [
+              {
+                "code": "generic.required_field_missing",
+                "message": "Field `name` is required",
+                "reference": "name"
+              }
+            ],
+            "kind": "Errors"
+          }
+        )
+        expect(last_response.body).to be_json_eql(msg).excluding("interaction_id")
+      end
+
+    end
 
   end
 
