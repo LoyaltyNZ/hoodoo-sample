@@ -88,5 +88,5 @@ curl http://localhost:9292/v1/people  --header "Content-Type: application/json; 
 ```
 - Remove `spec/generators/effective_date_spec.rb` and `spec/generators/utils_spec.rb`
 - Rename `spec/service/integration/example_spec.rb` -> `spec/service/integration/person_spec.rb` and add specs to test `get, post, patch` and `delete`.
-
+- Implementation spec `spec/service/implementation/person_spec.rb` tests db behaviour
 
