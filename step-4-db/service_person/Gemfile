@@ -89,6 +89,9 @@
     #
     gem 'thor'
 
+    # For checking JSON responses match expectations
+    gem 'json_spec'
+
   end
 
   group :test do

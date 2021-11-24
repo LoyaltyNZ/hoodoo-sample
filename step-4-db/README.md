@@ -45,7 +45,7 @@ Type "help" for help.
 postgres=#
 ```
 
-.. or if you prefer try a graphical client liek [postico](https://eggerapps.at/postico/)
+.. or if you prefer try a graphical client, for example [postico](https://eggerapps.at/postico/)
 
 -
 
@@ -79,16 +79,14 @@ default: &default
 ...
 ```
 - When testing via `curl` commands pass the outoput through the `jq` command, to make it more readable eg: change:
-
 ```
 curl http://localhost:9292/v1/people  --header "Content-Type: application/json; charset=utf-8"
 ```
-
 to
-
 ```
 curl http://localhost:9292/v1/people  --header "Content-Type: application/json; charset=utf-8" | jq .
 ```
-
+- Remove `spec/generators/effective_date_spec.rb` and `spec/generators/utils_spec.rb`
+- Rename `spec/service/integration/example_spec.rb` -> `spec/service/integration/person_spec.rb` and add specs to test `get, post, patch` and `delete`.
 
 
