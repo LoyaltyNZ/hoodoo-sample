@@ -1,4 +1,4 @@
-# Step 2: The basics
+# Step 3: Validation
 
 This repository contains sample code that explores basic hoodoo functionality. See [Step 3 on the wiki page](https://loyaltynz.atlassian.net/wiki/spaces/FT/pages/1630601431/Hoodoo+sample+app+challenge#Step-3.-Validation) that explains this challenge - using Hoodoo presenters.
 
