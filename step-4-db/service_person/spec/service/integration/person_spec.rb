@@ -21,6 +21,37 @@ require 'spec_helper'
 
 CONTENT_TYPE = { 'CONTENT_TYPE' => 'application/json; charset=utf-8' }
 
+
+# Search for people with a correctly encoded query
+# Checks that get a 200 response code, and returns the response as a Hash
+def do_list( search = {}, expected_code = 200 )
+  query = ''
+  unless search.empty?
+    encoded_search = URI.encode_www_form( search )
+    query = '?' << URI.encode_www_form( 'search'    => encoded_search )
+  end
+  response = get(
+    "/1/Person#{ query }",
+    nil,
+    CONTENT_TYPE
+  )
+  expect( last_response.status).to(
+    eq( expected_code )
+  )
+  return JSON.parse( last_response.body )
+end
+
+# compares resource being returned in the service response agains the models created by FactoryBot that are expected to be found in the services response.
+def compare_lists( resources, *models )
+  puts resources
+  models.each_with_index do | model, index |
+    resource = resources[ '_data' ][ index ]
+    expect( model.name                  ).to eq( resource[ 'name'          ] )
+    expect( model.date_of_birth.iso8601 ).to eq( resource[ 'date_of_birth' ] )
+  end
+end
+
+
 RSpec.describe '1/Person' do
 
   context 'show' do
@@ -116,6 +147,76 @@ RSpec.describe '1/Person' do
         # TODO check the _data elements
       end
 
+    end
+
+
+    context 'searching by date of birth' do
+
+      let!(:p1) { FactoryBot.create(:person, date_of_birth: '1970-01-01') }
+      let!(:p2) { FactoryBot.create(:person, date_of_birth: '1970-01-02') }
+      let!(:p3) { FactoryBot.create(:person, date_of_birth: '1970-01-03') }
+
+      it 'finds all' do
+        res = do_list()
+        compare_lists(res, p1, p2, p3)
+      end
+
+      it 'finds by exact match' do
+        res = do_list( :date_of_birth => '1970-01-02')
+        compare_lists(res, p2)
+      end
+
+      it 'finds by exact match, none found' do
+        res = do_list( :date_of_birth => '1970-01-04')
+        compare_lists(res)
+      end
+
+      it 'finds before' do
+        res = do_list( :date_of_birth_before => '1970-01-02')
+        compare_lists(res, p1, p2)
+      end
+
+      it 'finds before, none found' do
+        res = do_list( :date_of_birth_before => '1969-12-31')
+        compare_lists(res)
+      end
+
+      it 'finds after' do
+        res = do_list( :date_of_birth_after => '1970-01-02')
+        compare_lists(res, p2, p3)
+      end
+
+      it 'finds after, none found' do
+        res = do_list( :date_of_birth_after => '1970-01-04')
+        compare_lists(res)
+      end
+
+      it 'finds in range' do
+        res = do_list( :date_of_birth_after => '1969-01-01', :date_of_birth_before => '1970-01-02')
+        compare_lists(res, p1, p2)
+      end
+
+      it 'finds in range, none found' do
+        res = do_list( :date_of_birth_after => '1969-01-01', :date_of_birth_before => '1969-01-01')
+        compare_lists(res)
+      end
+
+      it 'finds in range, range invalid' do
+        res = do_list( {:date_of_birth_after => '1969-01-02', :date_of_birth_before => '1969-01-01'},
+                       422)
+        msg = %(
+          {
+            "errors": [
+              {
+                "code": "generic.invalid_parameters",
+                "message": "Invalid date range"
+              }
+            ],
+            "kind": "Errors"
+          }
+        )
+        expect(res.to_json).to be_json_eql(msg).excluding("interaction_id")
+      end
     end
 
   end

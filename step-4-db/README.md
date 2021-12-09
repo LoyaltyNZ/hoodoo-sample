@@ -51,11 +51,20 @@ postgres=#
 
 # Run service
 
-`bundle exec ruby main.rb`
+```
+bundle exec rake db:create
+bundle exec rake db:migrate
+bundle exec rackup
+```
 
 # Run Tests
 
-`bundle exec rspec spec`
+```
+RACK_ENV=test bundle exec rake db:create
+RACK_ENV=test bundle exec rake db:migrate
+bundle exec rspec spec
+```
+
 
 # Caveats
 
