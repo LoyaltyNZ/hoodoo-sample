@@ -8,5 +8,16 @@ class PersonInterface < Hoodoo::Services::Interface
     end
 
     update_same_as_create
+
+    to_list do
+      sort   default( :date_of_birth ) => [ :asc, :desc ],
+             :name                     => [ :asc, :desc ]
+
+      search :date_of_birth,
+             :date_of_birth_before,
+             :date_of_birth_after,
+             :name
+    end
+
   end
 end
